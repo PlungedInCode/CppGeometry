@@ -14,4 +14,8 @@ struct Point {
 
 // bool operator<(const Point& p1, const Point& p2);
 
+Point operator-(const Point& p1, const Point& p2);
+Point operator+(const Point& p1, const Point& p2);
+Point operator*(const double scalar, const Point& point);
+
 double getDistance(const Point& p1, const Point& p2);
