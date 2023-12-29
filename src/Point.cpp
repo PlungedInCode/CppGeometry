@@ -22,6 +22,18 @@ std::ostream& operator<<(std::ostream& out, const Point& point) {
 //     return len1 < len2;
 // }
 
+Point operator*(const double scalar, const Point& point) {
+    return Point(scalar * point.x, scalar * point.y);
+}
+
+Point operator-(const Point& p1, const Point& p2) {
+    return Point(p1.x - p2.x, p1.y - p2.y);
+}
+
+Point operator+(const Point& p1, const Point& p2) {
+    return Point(p1.x + p2.x, p1.y + p2.y);
+}
+
 double getDistance(const Point& p1, const Point& p2) {
     double xx = p2.x - p1.x;
     double yy = p2.y - p1.y;

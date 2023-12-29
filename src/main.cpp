@@ -5,6 +5,7 @@
 #include "Line.hpp"
 #include "Point.hpp"
 #include "Polygon.hpp"
+#include "Ellipse.hpp"
 
 int main() {
   Point x(-10.232323, 23.2);
@@ -34,4 +35,8 @@ int main() {
                   Point(0.0, 1.0));
 
   std::cout << polygon << '\n' << std::endl;
+
+  Ellipse elp(x, y, 10);
+  std::cout << elp << std::endl;
+
 }
