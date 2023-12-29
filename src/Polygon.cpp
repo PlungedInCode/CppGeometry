@@ -26,9 +26,11 @@ double Polygon::area() const {
   return 0.5 * std::abs(totalArea);
 }
 
-bool Polygon::operator==(const Shape& other) const {}
-bool Polygon::isCongruentTo(const Shape& other) const {}
-bool Polygon::isSimilarTo(const Shape& other) const {}
+// bool Polygon::operator==(const Shape& other) const {
+  
+// }
+// bool Polygon::isCongruentTo(const Shape& other) const {}
+// bool Polygon::isSimilarTo(const Shape& other) const {}
 
 bool Polygon::containsPoint(const Point& point) const {
   size_t count = vertices_.size();
@@ -70,13 +72,13 @@ void Polygon::reflex(const Point& center) {
     vertex = {2 * center.x - vertex.x, 2 * center.y - vertex.y};
   }
 }
-void Polygon::reflex(const Line& axis) {
-  // for (Point& vertex : vertices_) {
-  //   double distanceToAxis = axis.distanceToPoint(vertex);
-  //   Point projection = axis.projectPoint(vertex);
-  //   vertex = {2 * projection.x - vertex.x, 2 * projection.y - vertex.y};
-  // }
-}
+// void Polygon::reflex(const Line& axis) {
+//   // for (Point& vertex : vertices_) {
+//   //   double distanceToAxis = axis.distanceToPoint(vertex);
+//   //   Point projection = axis.projectPoint(vertex);
+//   //   vertex = {2 * projection.x - vertex.x, 2 * projection.y - vertex.y};
+//   // }
+// }
 
 void Polygon::scale(const Point& center, double coefficient) {
   for (Point& vertex : vertices_) {
