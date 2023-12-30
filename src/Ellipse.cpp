@@ -4,21 +4,39 @@ Ellipse::Ellipse(const Point& focus1, const Point& focus2,
                  double sum_of_distances)
     : focus1_(focus1), focus2_(focus2), sum_of_distances_(sum_of_distances) {}
 
+Ellipse::~Ellipse() {}
+
 std::pair<Point, Point> Ellipse::focuses() const {
   return std::make_pair(focus1_, focus2_);
 }
 
-Ellipse::~Ellipse() {}
-
 // std::pair<Line, Line> Ellipse::directrices() const {
+//     // Calculate the semi-major and semi-minor axes
+//     double semiMajorAxis = sum_of_distances_ / 2.0;
+//     double semiMinorAxis = semiMajorAxis * std::sqrt(1 - eccentricity() * eccentricity());
 
+//     // Calculate the coordinates of the foci
+//     double cx = (focus1_.x + focus2_.x) / 2.0;
+//     double cy = (focus1_.y + focus2_.y) / 2.0;
+
+//     // Calculate the angles of the major and minor axes
+//     double majorAxisAngle = std::atan2(focus2_.y - focus1_.y, focus2_.x - focus1_.x);
+//     double minorAxisAngle = majorAxisAngle + M_PI / 2.0;
+
+//     // Calculate the coordinates of the directrices
+//     double dx1 = cx + eccentricity() * semiMajorAxis * std::cos(majorAxisAngle);
+//     double dy1 = cy + eccentricity() * semiMajorAxis * std::sin(majorAxisAngle);
+//     double dx2 = cx + eccentricity() * semiMajorAxis * std::cos(majorAxisAngle + M_PI);
+//     double dy2 = cy + eccentricity() * semiMajorAxis * std::sin(majorAxisAngle + M_PI);
+
+//     Line directrix1(-std::sin(majorAxisAngle), std::cos(majorAxisAngle));
+//     Line directrix2(-std::sin(minorAxisAngle), std::cos(minorAxisAngle));
+
+//     return {directrix1, directrix2};
 // }
 
 std::pair<Line, Line> Ellipse::directrices() const {
-  // Implementation to calculate directrices
-  // Assuming a simple case where directrices are vertical and horizontal lines
-  // passing through the foci double distanceBetweenFoci = getDistance(focus1_,
-  // focus2_);
+
   double halfDistance = sum_of_distances_ / 2.0;
 
   Point directrix1(focus1_.x, focus1_.y + halfDistance);
@@ -43,9 +61,6 @@ Point Ellipse::center() const {
 
 //* Implementation of Shape class methods
 double Ellipse::perimeter() const {
-  // An accurate calculation of ellipse perimeter involves elliptic integrals,
-  // but for simplicity, we use an approximation here.
-  // Note: This is an approximation and may not be suitable for all cases.
   double a = sum_of_distances_ / 2.0;
   double b = std::sqrt(a * a - getDistance(focus1_, focus2_) *
                                    getDistance(focus1_, focus2_) / 4.0);
@@ -62,21 +77,49 @@ double Ellipse::area() const {
   return std::acos(0.0) * a * b;
 }
 
-// bool Ellipse::operator==(const Shape& another) const {}
-// bool Ellipse::isCongruentTo(const Shape& another) const {}
-// bool Ellipse::isSimilarTo(const Shape& another) const {}
+bool Ellipse::operator==(const Shape& another) const {
+  const Ellipse* otherEllipse = dynamic_cast<const Ellipse*>(&another);
+
+  if (otherEllipse) {
+    return focus1_ == otherEllipse->focus1_ &&
+           focus2_ == otherEllipse->focus2_ &&
+           sum_of_distances_ == otherEllipse->sum_of_distances_;
+  }
+
+  return false;
+}
+bool Ellipse::isCongruentTo(const Shape& another) const {
+  const Ellipse* otherEllipse = dynamic_cast<const Ellipse*>(&another);
+
+  if (otherEllipse) {
+    // Two ellipses are congruent if they have the same focuses and distance sum
+    return focus1_ == otherEllipse->focus1_ &&
+           focus2_ == otherEllipse->focus2_ &&
+           sum_of_distances_ == otherEllipse->sum_of_distances_;
+  }
+
+  return false;
+}
+
+bool Ellipse::isSimilarTo(const Shape& another) const {
+  const Ellipse* otherEllipse = dynamic_cast<const Ellipse*>(&another);
+
+  if (otherEllipse) {
+    // Two ellipses are similar if they have the same focuses
+    return focus1_ == otherEllipse->focus1_ && focus2_ == otherEllipse->focus2_;
+  }
+
+  return false;
+}
 
 bool Ellipse::containsPoint(const Point& point) const {
-  // Calculate the distance from the given point to each focus
   double distance1 = getDistance(point, focus1_);
   double distance2 = getDistance(point, focus2_);
 
-  // Check if the sum of distances is approximately equal to the sum of
-  // distances from the foci
   return std::abs(distance1 + distance2 - sum_of_distances_) < 1e-6;
 }
+
 void Ellipse::rotate(const Point& center, double angle) {
-  // Translate the foci and the center of the ellipse to the origin
   Point translatedFocus1 = focus1_ - center;
   Point translatedFocus2 = focus2_ - center;
   // Point translatedCenter = this->center() - center;
@@ -107,13 +150,11 @@ void Ellipse::reflex(const Point& center) {
   focus2_ = 2 * center - focus2_;
 }
 
-// void Ellipse::reflex(const Line& axis) {
+void Ellipse::reflex(const Line& axis) {
 
-// }
+}
 
 void Ellipse::scale(const Point& center, double coefficient) {
-  // Scale the foci and the center of the ellipse with respect to the given
-  // center
   focus1_ = center + coefficient * (focus1_ - center);
   focus2_ = center + coefficient * (focus2_ - center);
 }
