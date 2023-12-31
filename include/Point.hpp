@@ -1,7 +1,11 @@
 #pragma once
 
+#include "Constants.hpp"
+
 #include <ostream>
 #include <math.h>
+
+class Line;
 
 struct Point {
     double x, y;
@@ -9,13 +13,28 @@ struct Point {
     bool operator==(const Point& other) const;
     bool operator!=(const Point& other) const;
 
+    Point& operator+=(const Point& rhs);
+    friend Point operator+(Point lhs, const Point& rhs);
+
+    Point& operator-=(const Point& rhs);
+    friend Point operator-(Point lhs, const Point& rhs);
+
+    Point& operator*=(const double scalar);
+    friend Point operator*(Point lhs, const double scalar);
+
+    Point& operator/=(const double scalar);
+    friend Point operator/(Point lhs, const double scalar);
+
+    void reflex(const Point& center);
+    void reflex(const Line& axis);
+
+    void rotate(const Point& center, const double angle);
+
+    void scale(const Point& center, const double coefficient);
+    
     friend std::ostream& operator<<(std::ostream& out, const Point& point);
 };
 
-// bool operator<(const Point& p1, const Point& p2);
-
-Point operator-(const Point& p1, const Point& p2);
-Point operator+(const Point& p1, const Point& p2);
-Point operator*(const double scalar, const Point& point);
-
 double getDistance(const Point& p1, const Point& p2);
+
+// bool operator<(const Point& p1, const Point& p2);
