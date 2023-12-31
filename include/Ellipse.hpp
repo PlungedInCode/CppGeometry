@@ -7,12 +7,12 @@ public:
     Ellipse(const Point& focus1, const Point& focus2, double sumOfDistances);
     virtual ~Ellipse();
     
-    virtual std::pair<Point, Point> focuses() const;
-    virtual std::pair<Line, Line> directrices() const;
-    virtual double eccentricity() const;
-    virtual Point center() const;
+    std::pair<Point, Point> focuses() const;
+    std::pair<Line, Line> directrices() const;
+    double eccentricity() const;
+    Point center() const;
 
-    // Implementation of Shape class methods
+    //* Shape class methods
     double perimeter() const override;
     double area() const override;
     bool operator==(const Shape& another) const override;
