@@ -9,10 +9,8 @@ class Polygon : public Shape {
  public:
   
   Polygon(const std::vector<Point>& vertices);
-
   template <typename... Args>
-  Polygon(const Args&... args) : vertices_({args...}) {}
-  
+  Polygon(const Args&... args) : vertices_({args...}) {} 
   virtual ~Polygon();
 
   size_t verticesCount() const;
@@ -33,7 +31,6 @@ class Polygon : public Shape {
   void reflex(const Line& axis) override;
   void scale(const Point& center, const double coefficient) override;
 
-  // stream operator overloading
   friend std::ostream& operator<<(std::ostream& out, const Polygon& polygon);
 
  private:

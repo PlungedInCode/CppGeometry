@@ -52,7 +52,7 @@ double Polygon::perimeter() const {
 double Polygon::area() const {
   size_t n = vertices_.size();
   if (n < 3) {
-    return 0.0;  // Area is not defined for polygons with less than 3 vertices_
+    return 0.0;
   }
 
   double totalArea = 0.0;
@@ -68,20 +68,38 @@ bool Polygon::operator==(const Shape& other) const {
   const Polygon* otherPolygon = dynamic_cast<const Polygon*>(&other);
 
   if (otherPolygon) {
-    // Compare vertices for equality
     return vertices_ == otherPolygon->vertices_;
   }
 
   return false;
 }
-bool Polygon::isCongruentTo(const Shape& other) const {}
-bool Polygon::isSimilarTo(const Shape& other) const {}
+
+// TODO : Research and rewrit this
+bool Polygon::isCongruentTo(const Shape& other) const {
+  const Polygon* otherPolygon = dynamic_cast<const Polygon*>(&other);
+
+  if (otherPolygon) {
+    return vertices_.size() == otherPolygon->vertices_.size();
+  }
+
+  return false;
+}
+
+// TODO : Research and rewrite this
+bool Polygon::isSimilarTo(const Shape& other) const {
+  const Polygon* otherPolygon = dynamic_cast<const Polygon*>(&other);
+
+  if (otherPolygon) {
+    return vertices_.size() == otherPolygon->vertices_.size();
+  }
+
+  return false;
+}
 
 bool Polygon::containsPoint(const Point& point) const {
   size_t count = vertices_.size();
   if (count < 3) {
-    return false;  // Containment is not defined for polygons with less than 3
-                   // vertices
+    return false;
   }
 
   int crossings = 0;
@@ -104,37 +122,33 @@ bool Polygon::containsPoint(const Point& point) const {
 }
 void Polygon::rotate(const Point& center, const double angle) {
   for (auto& vertex : vertices_) {
-    double new_x = center.x + (vertex.x - center.x) * std::cos(angle) -
-                   (vertex.y - center.y) * std::sin(angle);
-    double new_y = center.y + (vertex.x - center.x) * std::sin(angle) +
-                   (vertex.y - center.y) * std::cos(angle);
-    vertex = {new_x, new_y};
+    vertex.rotate(center, angle);
   }
 }
 
 void Polygon::reflex(const Point& center) {
   for (auto& vertex : vertices_) {
-    vertex = {2 * center.x - vertex.x, 2 * center.y - vertex.y};
+    vertex.reflex(center);
   }
 }
 void Polygon::reflex(const Line& axis) {
-  // for (Point& vertex : vertices_) {
-  //   double distanceToAxis = axis.distanceToPoint(vertex);
-  //   Point projection = axis.projectPoint(vertex);
-  //   vertex = {2 * projection.x - vertex.x, 2 * projection.y - vertex.y};
-  // }
+  for (Point& vertex : vertices_) {
+    vertex.reflex(axis);
+  }
 }
 
 void Polygon::scale(const Point& center, double coefficient) {
   for (Point& vertex : vertices_) {
-    vertex = {center.x + coefficient * (vertex.x - center.x),
-              center.y + coefficient * (vertex.y - center.y)};
+    vertex.scale(center, coefficient);
   }
 }
 
 std::ostream& operator<<(std::ostream& out, const Polygon& polygon) {
+  out << "{";
   for (auto it : polygon.vertices_) {
+
     out << it << ", ";
   }
+  out << "}";
   return out;
 }
