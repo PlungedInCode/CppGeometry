@@ -57,24 +57,6 @@ Point Triangle::centroid() const {
   return {centerX, centerY};
 }
 
-// Point Triangle::orthocenter() const {
-//   auto vertices = Polygon::getVertices();
-//   Point A = vertices[0];
-//   Point B = vertices[1];
-//   Point C = vertices[2];
-
-//   double a = getDistance(B, C);
-//   double b = getDistance(A, C);
-//   double c = getDistance(A, B);
-
-//   double numeratorX = a * a * (A.x - B.x + C.x) + b * b * (B.x - C.x + A.x) +
-//                       c * c * (C.x - A.x + B.x);
-//   double numeratorY = a * a * (A.y - B.y + C.y) + b * b * (B.y - C.y + A.y) +
-//                       c * c * (C.y - A.y + B.y);
-//   double denom = 2 * (a * (B.y - C.y) + b * (C.y - A.y) + c * (A.y - B.y));
-
-//   return {numeratorX / denom, numeratorY / denom};
-// }
 Point Triangle::orthocenter() const {
   Point circum_center = circumscribedCircle().center();
   Point centroid_p = this->centroid();
@@ -84,16 +66,9 @@ Point Triangle::orthocenter() const {
 }
 
 
-// Line Triangle::EulerLine() const {
-//   // std::cout << centroid()
-//   return Line(centroid(), circumscribedCircle().center());
-// }
-
 Line Triangle::EulerLine() const {
-  // Calculate the Euler line of the triangle
   Point orthocenter = Triangle::orthocenter();
   Point circumcenter = Triangle::circumscribedCircle().center();
-  std::cout << orthocenter << " " << circumcenter << std::endl;
   return Line(orthocenter, circumcenter);
 }
 
