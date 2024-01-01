@@ -19,7 +19,8 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const Line& line);
 
 private:
+    // y = slope * x + intercept or x = intercept (if line is vertical)
     double slope_;
     double intercept_;
-    // y = slope * x + intercept
+    bool vertical_;
 };
