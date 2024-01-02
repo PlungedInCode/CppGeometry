@@ -1,6 +1,6 @@
 #include "Polygon.hpp"
 
-//*-------------------------Polygon---------------------------------------
+//* Additional method specific to Polygon
 Polygon::Polygon(const std::vector<Point>& vertices) : vertices_(vertices) {}
 
 Polygon::~Polygon() {}
@@ -38,7 +38,7 @@ bool Polygon::isConvex() const {
   return true;
 }
 
-//*-------------------------Shape---------------------------------------
+//* Virtual methods from Shape class
 
 double Polygon::perimeter() const {
   size_t count = vertices_.size();
@@ -68,7 +68,15 @@ bool Polygon::operator==(const Shape& other) const {
   const Polygon* otherPolygon = dynamic_cast<const Polygon*>(&other);
 
   if (otherPolygon) {
-    return vertices_ == otherPolygon->vertices_;
+    std::set<Point> other;
+    for (auto it : otherPolygon->vertices_) {
+      other.insert(it);
+    }
+    std::set<Point> first;
+    for (auto it : vertices_) {
+      first.insert(it);
+    }
+    return other == first;
   }
 
   return false;
