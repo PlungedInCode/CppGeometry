@@ -11,27 +11,9 @@ std::pair<Point, Point> Ellipse::focuses() const {
 }
 
 std::pair<Line, Line> Ellipse::directrices() const {
-  // Calculate the semi-major and semi-minor axes
-  double eccentricity = this->eccentricity();
-  double semiMajorAx = sum_of_distances_ / 2.0;
-  double semiMinorAx = semiMajorAx * std::sqrt(1 - eccentricity * eccentricity);
-
-  // Calculate the coordinates of the foci
-  double cx = (focus1_.x + focus2_.x) / 2.0;
-  double cy = (focus1_.y + focus2_.y) / 2.0;
-
-  // Calculate the angles of the major and minor axes
   double majorAxisAngle =
       std::atan2(focus2_.y - focus1_.y, focus2_.x - focus1_.x);
   double minorAxisAngle = majorAxisAngle + M_PI / 2.0;
-
-  // Calculate the coordinates of the directrices
-  double dx1 = cx + eccentricity * semiMajorAx * std::cos(majorAxisAngle);
-  double dy1 = cy + eccentricity * semiMajorAx * std::sin(majorAxisAngle);
-  double dx2 =
-      cx + eccentricity * semiMajorAx * std::cos(majorAxisAngle + M_PI);
-  double dy2 =
-      cy + eccentricity * semiMajorAx * std::sin(majorAxisAngle + M_PI);
 
   Line directrix1(-std::sin(majorAxisAngle), std::cos(majorAxisAngle));
   Line directrix2(-std::sin(minorAxisAngle), std::cos(minorAxisAngle));

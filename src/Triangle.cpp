@@ -1,17 +1,15 @@
 #include "Triangle.hpp"
 
 #include <iostream>
-
 #include <cmath>
 
-// Constructor
 Triangle::Triangle(const Point& vertex1, const Point& vertex2,
                    const Point& vertex3)
     : Polygon::Polygon(vertex1, vertex2, vertex3) {}
 
 Triangle::~Triangle(){};
 
-// Additional methods specific to Triangle
+//* Additional methods specific to Triangle
 Circle Triangle::circumscribedCircle() const {
   auto vertices = Polygon::getVertices();
   Point A = vertices[0];
