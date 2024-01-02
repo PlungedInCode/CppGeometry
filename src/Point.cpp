@@ -103,9 +103,8 @@ double getDistance(const Point& p1, const Point& p2) {
   return distance;
 }
 
-// bool operator<(const Point& point1, const Point& point2) {
-//     double len1 = point1.x * point1.x - point1.y * point1.y;
-//     double len2 = point2.x * point2.x - point2.y * point2.y;
-
-//     return len1 < len2;
-// }
+bool Point::operator<(const Point& other) const {
+  double len1 = this->x * this->x + this->y * this->y;
+  double len2 = other.x * other.x + other.y * other.y;
+  return len1 < len2;
+}

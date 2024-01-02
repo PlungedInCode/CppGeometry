@@ -32,9 +32,9 @@ struct Point {
 
     void scale(const Point& center, const double coefficient);
     
+    bool operator<(const Point& other) const;
+
     friend std::ostream& operator<<(std::ostream& out, const Point& point);
 };
 
 double getDistance(const Point& p1, const Point& p2);
-
-// bool operator<(const Point& p1, const Point& p2);
