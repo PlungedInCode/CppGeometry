@@ -1,13 +1,14 @@
 #include "Point.hpp"
+#include "Line.hpp"
 
 #include <iostream>
 
-#include "Line.hpp"
+using namespace Uitls;
 
 Point::Point(const double x, const double y) : x(x), y(y) {}
 
 bool Point::operator==(const Point& other) const {
-  return x == other.x && y == other.y;
+  return isEqual(x, other.x) && isEqual(y, other.y);
 }
 
 bool Point::operator!=(const Point& other) const { return !(*this == other); }
@@ -56,7 +57,7 @@ Point operator/(Point lhs, const double scalar) {
   return lhs;
 }
 
-void Point::reflex(const Line& axis) {
+void Point::reflect(const Line& axis) {
   double x0 = x, y0 = y;
   double slope = axis.getSlope(), intercept = axis.getIntercept();
 
@@ -74,7 +75,7 @@ void Point::reflex(const Point& center) {
 
 void Point::rotate(const Point& center, double angle) {
   Point translated = *this - center;
-  angle = Constants::PI * angle / 180;
+  angle = degToRad(angle);
   double rotatedX =
       translated.x * std::cos(angle) - translated.y * std::sin(angle);
   double rotatedY =
