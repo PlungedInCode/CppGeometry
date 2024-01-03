@@ -26,7 +26,7 @@ struct Point {
     friend Point operator/(Point lhs, const double scalar);
 
     void reflex(const Point& center);
-    void reflex(const Line& axis);
+    void reflect(const Line& axis);
 
     void rotate(const Point& center, const double angle);
 
