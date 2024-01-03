@@ -62,6 +62,10 @@ bool Ellipse::operator==(const Shape& another) const {
   return false;
 }
 
+bool Ellipse::operator!=(const Shape& another) const {
+  return !(*this == another);
+}
+
 // TODO: Research
 bool Ellipse::isCongruentTo(const Shape& another) const {
   const Ellipse* otherEllipse = dynamic_cast<const Ellipse*>(&another);
@@ -107,9 +111,9 @@ void Ellipse::reflex(const Point& center) {
   focus2_.reflex(center);
 }
 
-void Ellipse::reflex(const Line& axis) {
-  focus1_.reflex(axis);
-  focus2_.reflex(axis);
+void Ellipse::reflect(const Line& axis) {
+  focus1_.reflect(axis);
+  focus2_.reflect(axis);
 }
 
 void Ellipse::scale(const Point& center, double coefficient) {

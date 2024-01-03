@@ -82,6 +82,8 @@ bool Polygon::operator==(const Shape& other) const {
   return false;
 }
 
+bool Polygon::operator!=(const Shape& other) const { return !(*this == other); }
+
 // TODO : Research and rewrit this
 bool Polygon::isCongruentTo(const Shape& other) const {
   const Polygon* otherPolygon = dynamic_cast<const Polygon*>(&other);
@@ -139,9 +141,9 @@ void Polygon::reflex(const Point& center) {
     vertex.reflex(center);
   }
 }
-void Polygon::reflex(const Line& axis) {
+void Polygon::reflect(const Line& axis) {
   for (Point& vertex : vertices_) {
-    vertex.reflex(axis);
+    vertex.reflect(axis);
   }
 }
 
