@@ -1,5 +1,7 @@
 #include "Polygon.hpp"
 
+using namespace Utils;
+
 //* Additional method specific to Polygon
 Polygon::Polygon(const std::vector<Point>& vertices) : vertices_(vertices) {}
 
@@ -9,11 +11,11 @@ size_t Polygon::verticesCount() const { return vertices_.size(); }
 
 std::vector<Point> Polygon::getVertices() const { return vertices_; }
 
-int CrossProduct(std::tuple<Point, Point, Point> points) {
-  double x1 = (std::get<1>(points).x) - (std::get<0>(points).x);
-  double y1 = (std::get<1>(points).y) - (std::get<0>(points).y);
-  double x2 = (std::get<2>(points).x) - (std::get<0>(points).x);
-  double y2 = (std::get<2>(points).y) - (std::get<0>(points).y);
+int CrossProduct(const Point& p1, const Point& p2, const Point& p3) {
+  double x1 = (p2.x) - (p1.x);
+  double y1 = (p2.y) - (p1.y);
+  double x2 = (p3.x) - (p1.x);
+  double y2 = (p3.y) - (p1.y);
 
   return (x1 * y2 - y1 * x2);
 }
@@ -25,9 +27,8 @@ bool Polygon::isConvex() const {
   }
   double prev = 0, curr = 0;
   for (size_t i = 0; i < count; ++i) {
-    std::tuple<Point, Point, Point> triple = {
-        vertices_[i], vertices_[(i + 1) % count], vertices_[(i + 2) % count]};
-    curr = CrossProduct(triple);
+    curr = CrossProduct(vertices_[i], vertices_[(i + 1) % count],
+                        vertices_[(i + 2) % count]);
     if (curr != 0) {
       if (curr * prev < 0) {
         return false;
@@ -61,49 +62,106 @@ double Polygon::area() const {
                   vertices_[(i + 1) % n].x * vertices_[i].y);
   }
 
-  return 0.5 * std::abs(totalArea);
+  return 0.5 * std::fabs(totalArea);
 }
-// TODO : actually we should compare set of points, not just ordered points
-bool Polygon::operator==(const Shape& other) const {
-  const Polygon* otherPolygon = dynamic_cast<const Polygon*>(&other);
 
-  if (otherPolygon) {
-    std::set<Point> other;
-    for (auto it : otherPolygon->vertices_) {
-      other.insert(it);
+bool verticesVectorsEqual(std::vector<Point> lhs, std::vector<Point> rhs) {
+  for (size_t j = 0; j < lhs.size() + 1; ++j) {
+    bool equal = true;
+    for (size_t i = 0; i < lhs.size(); ++i) {
+      if (lhs[i] != rhs[i]) {
+        equal = false;
+        break;
+      }
     }
-    std::set<Point> first;
-    for (auto it : vertices_) {
-      first.insert(it);
+    std::rotate(lhs.begin(), lhs.begin() + 1, lhs.end());
+    if (equal) {
+      return true;
     }
-    return other == first;
+  }
+  return false;
+}
+
+bool Polygon::operator==(const Shape& other) const {
+  const auto otherPolygon = dynamic_cast<const Polygon*>(&other);
+
+  if (!otherPolygon || this->verticesCount() != otherPolygon->verticesCount()) {
+    return false;
   }
 
-  return false;
+  std::vector<Point> thisCopy = this->getVertices();
+  bool equal = verticesVectorsEqual(thisCopy, otherPolygon->getVertices());
+  if (!equal) {
+    std::reverse(thisCopy.begin(), thisCopy.end());
+    equal = verticesVectorsEqual(thisCopy, otherPolygon->getVertices());
+  }
+  return equal;
 }
 
 bool Polygon::operator!=(const Shape& other) const { return !(*this == other); }
 
-// TODO : Research and rewrit this
 bool Polygon::isCongruentTo(const Shape& other) const {
-  const Polygon* otherPolygon = dynamic_cast<const Polygon*>(&other);
+  const auto otherPolygon = dynamic_cast<const Polygon*>(&other);
 
-  if (otherPolygon) {
-    return vertices_.size() == otherPolygon->vertices_.size();
+  if (!otherPolygon || this->verticesCount() != otherPolygon->verticesCount()) {
+    return false;
+  }
+  std::vector<double> lhs_side_len, rhs_side_len;
+  size_t N = this->verticesCount();
+  for (size_t i = 0; i < N; ++i) {
+    lhs_side_len.push_back(getDistance(vertices_[i], vertices_[(i + 1) % N]));
+    rhs_side_len.push_back(getDistance(otherPolygon->vertices_[i],
+                                       otherPolygon->vertices_[(i + 1) % N]));
   }
 
-  return false;
+  bool is_equal = true;
+  int match_index = -1, first_index = 0;
+  double first_len = rhs_side_len[0];
+  while (match_index < this->verticesCount()) {
+    for (size_t i = first_index; i < verticesCount(); ++i) {
+      if (isEqual(lhs_side_len[i], first_len)) {
+        match_index = i;
+        break;
+      }
+    }
+    if (match_index == -1) {
+      return false;
+    }
+
+    for (size_t i = 0; i < this->verticesCount(); ++i) {
+      if (!isEqual(rhs_side_len[i], lhs_side_len[(match_index + i) % N])) {
+        is_equal = false;
+        break;
+      }
+    }
+    if (is_equal) return true;
+
+    bool is_equal = true;
+    for (size_t i = 0; i < this->verticesCount(); ++i) {
+      int j = match_index - i;
+      if (match_index - i < 0) {
+        j += N;
+      }
+      if (!isEqual(rhs_side_len[i], lhs_side_len[j])) {
+        is_equal = false;
+        break;
+      }
+    }
+    if (is_equal) return true;
+    first_index = match_index + 1;
+    match_index = -1;
+  }
+  return is_equal;
 }
 
-// TODO : Research and rewrite this
 bool Polygon::isSimilarTo(const Shape& other) const {
-  const Polygon* otherPolygon = dynamic_cast<const Polygon*>(&other);
+  const auto otherPolygon = dynamic_cast<const Polygon*>(&other);
 
-  if (otherPolygon) {
-    return vertices_.size() == otherPolygon->vertices_.size();
+  if (!otherPolygon) {
+    return false;
   }
-
-  return false;
+  double ratio = this->perimeter() / otherPolygon->perimeter();
+  return Utils::isEqual(ratio * ratio, this->area() / otherPolygon->area());
 }
 
 bool Polygon::containsPoint(const Point& point) const {
@@ -154,10 +212,12 @@ void Polygon::scale(const Point& center, double coefficient) {
 }
 
 std::ostream& operator<<(std::ostream& out, const Polygon& polygon) {
+  bool flag = false;
   out << "{";
-  for (auto it : polygon.vertices_) {
-
-    out << it << ", ";
+  for (auto it : polygon.getVertices()) {
+    if (flag) out << ", ";
+    out << it;
+    if (!flag) flag = true;
   }
   out << "}";
   return out;

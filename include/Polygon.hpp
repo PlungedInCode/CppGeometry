@@ -5,6 +5,7 @@
 #include <set>
 
 #include "Shape.hpp"
+#include "Constants.hpp"
 
 class Polygon : public Shape {
  public:
