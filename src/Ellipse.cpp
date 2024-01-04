@@ -1,5 +1,7 @@
 #include "Ellipse.hpp"
 
+using namespace Utils;
+
 Ellipse::Ellipse(const Point& focus1, const Point& focus2,
                  double sum_of_distances)
     : focus1_(focus1), focus2_(focus2), sum_of_distances_(sum_of_distances) {}
@@ -52,42 +54,41 @@ double Ellipse::area() const {
 
 bool Ellipse::operator==(const Shape& another) const {
   const Ellipse* otherEllipse = dynamic_cast<const Ellipse*>(&another);
-
-  if (otherEllipse) {
-    return focus1_ == otherEllipse->focus1_ &&
-           focus2_ == otherEllipse->focus2_ &&
-           sum_of_distances_ == otherEllipse->sum_of_distances_;
+  if (!otherEllipse) {
+    return false;
+  }
+  if (focus1_ == otherEllipse->focus1_ && focus2_ == otherEllipse->focus2_ &&
+      isEqual(sum_of_distances_, otherEllipse->sum_of_distances_)) {
+    return true;
   }
 
-  return false;
+  return focus1_ == otherEllipse->focus2_ && focus2_ == otherEllipse->focus1_ &&
+         isEqual(sum_of_distances_, otherEllipse->sum_of_distances_);
 }
 
 bool Ellipse::operator!=(const Shape& another) const {
   return !(*this == another);
 }
 
-// TODO: Research
 bool Ellipse::isCongruentTo(const Shape& another) const {
   const Ellipse* otherEllipse = dynamic_cast<const Ellipse*>(&another);
 
-  if (otherEllipse) {
-    return focus1_ == otherEllipse->focus1_ &&
-           focus2_ == otherEllipse->focus2_ &&
-           sum_of_distances_ == otherEllipse->sum_of_distances_;
+  if (!otherEllipse) {
+    return false;
   }
-
-  return false;
+  return isEqual(getDistance(focus1_, focus2_),
+                 getDistance(otherEllipse->focus1_, otherEllipse->focus2_)) &&
+         isEqual(sum_of_distances_, otherEllipse->sum_of_distances_);
 }
 
-// TODO: Research
 bool Ellipse::isSimilarTo(const Shape& another) const {
   const Ellipse* otherEllipse = dynamic_cast<const Ellipse*>(&another);
 
-  if (otherEllipse) {
-    return focus1_ == otherEllipse->focus1_ && focus2_ == otherEllipse->focus2_;
+  if (!otherEllipse) {
+    return false;
   }
 
-  return false;
+  return isEqual(eccentricity(), otherEllipse->eccentricity());
 }
 
 bool Ellipse::containsPoint(const Point& point) const {

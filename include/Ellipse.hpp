@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Shape.hpp"
+#include "Constants.hpp"
 
 class Ellipse : public Shape {
 public:
