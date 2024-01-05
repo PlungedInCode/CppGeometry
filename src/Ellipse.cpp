@@ -2,128 +2,124 @@
 
 using namespace Utils;
 
-Ellipse::Ellipse(const Point& focus1, const Point& focus2,
-                 double sum_of_distances)
-    : focus1_(focus1), focus2_(focus2), sum_of_distances_(sum_of_distances) {}
 
-Ellipse::~Ellipse() {}
+Ellipse::Ellipse(const Point& p1, const Point& p2, double len)
+    : focus_1_(p1), focus_2_(p2), length_(len) {}
 
-std::pair<Point, Point> Ellipse::focuses() const {
-  return std::make_pair(focus1_, focus2_);
+double Ellipse::perimeter() const {
+  double c = Vector{focus_1_, focus_2_}.len() / 2;
+  double a = length_ / 2;
+  double perimeter_ = 4 * a * std::comp_ellint_2(c / a);
+  return perimeter_;
+}
+double Ellipse::area() const { 
+  double c = Vector{focus_1_, focus_2_}.len() / 2;
+  double a = length_ / 2;
+  double b = sqrt((length_ * length_ / 4) - c * c);
+  double area_ = M_PI * a * b;
+  return area_;
+}
+
+bool Ellipse::isCongruentTo(const Shape& other) const {
+  auto* ell = dynamic_cast<const Ellipse*>(&other);
+  if (ell == nullptr || fabs(ell->length_ - length_) > Constants::EPSILON) {
+    return false;
+  }
+  if (fabs(Vector{focus_1_, focus_2_}.len() -
+           Vector{ell->focus_1_, ell->focus_2_}.len()) < Constants::EPSILON) {
+    return true;
+  }
+  return false;
+}
+bool Ellipse::isSimilarTo(const Shape& other) const {
+  auto* ell = dynamic_cast<const Ellipse*>(&other);
+  if (ell == nullptr) {
+    return false;
+  }
+  double k = Vector{focus_1_, focus_2_}.len() /
+             Vector{ell->focus_1_, ell->focus_2_}.len();
+  if (fabs(length_ / ell->length_ - k) < Constants::EPSILON) {
+    return true;
+  }
+  return false;
+}
+bool Ellipse::containsPoint(const Point& point) const {
+  if (Vector{focus_1_, point}.len() + Vector{focus_2_, point}.len() <=
+      length_) {
+    return true;
+  }
+  return false;
+}
+std::pair<Point, Point> Ellipse::focuses() const { return {focus_1_, focus_2_}; }
+
+double Ellipse::eccentricity() const {
+  return Vector{focus_1_, focus_2_}.len() / length_;
 }
 
 std::pair<Line, Line> Ellipse::directrices() const {
-  double majorAxisAngle =
-      std::atan2(focus2_.y - focus1_.y, focus2_.x - focus1_.x);
-  double minorAxisAngle = majorAxisAngle + M_PI / 2.0;
 
+  double majorAxisAngle =
+      std::atan2(focus_2_.y - focus_1_.y, focus_2_.x - focus_1_.x);
+  double minorAxisAngle = majorAxisAngle + M_PI / 2.0;
   Line directrix1(-std::sin(majorAxisAngle), std::cos(majorAxisAngle));
   Line directrix2(-std::sin(minorAxisAngle), std::cos(minorAxisAngle));
 
   return {directrix1, directrix2};
 }
 
-double Ellipse::eccentricity() const {
-  double distanceBetweenFoci = getDistance(focus1_, focus2_);
-  return distanceBetweenFoci / (2 * sum_of_distances_);
-}
-
 Point Ellipse::center() const {
-  double centerX = (focus1_.x + focus2_.x) / 2.0;
-  double centerY = (focus1_.y + focus2_.y) / 2.0;
+  double centerX = (focus_1_.x + focus_2_.x) / 2.0;
+  double centerY = (focus_1_.y + focus_2_.y) / 2.0;
   return Point(centerX, centerY);
 }
 
-//* Implementation of Shape class methods
-double Ellipse::perimeter() const {
-  double a = sum_of_distances_ / 2.0;
-  double distance = getDistance(focus1_, focus2_);
-  double b = std::sqrt(a * a - distance * distance / 4.0);
-
-  return 4.0 * (std::acos(0.0) *
-                ((3 * (a + b)) - std::sqrt((3 * a + b) * (a + 3 * b))));
-}
-
-double Ellipse::area() const {
-  double a = sum_of_distances_ / 2.0;
-  double distance = getDistance(focus1_, focus2_);
-  double b = std::sqrt(a * a - distance * distance / 4.0);
-
-  return std::acos(0.0) * a * b;
-}
-
-bool Ellipse::operator==(const Shape& another) const {
-  const Ellipse* otherEllipse = dynamic_cast<const Ellipse*>(&another);
-  if (!otherEllipse) {
+bool Ellipse::operator==(const Shape& other) const {
+  auto* ell = dynamic_cast<const Ellipse*>(&other);
+  if (ell == nullptr) {
     return false;
   }
-  if (focus1_ == otherEllipse->focus1_ && focus2_ == otherEllipse->focus2_ &&
-      isEqual(sum_of_distances_, otherEllipse->sum_of_distances_)) {
+  return *this == *ell;
+}
+bool Ellipse::operator==(const Ellipse& other) const {
+  if (other.length_ != length_) {
+    return false;
+  }
+  if (other.focus_1_ == focus_1_ && other.focus_2_ == focus_2_) {
     return true;
   }
-
-  return focus1_ == otherEllipse->focus2_ && focus2_ == otherEllipse->focus1_ &&
-         isEqual(sum_of_distances_, otherEllipse->sum_of_distances_);
-}
-
-bool Ellipse::operator!=(const Shape& another) const {
-  return !(*this == another);
-}
-
-bool Ellipse::isCongruentTo(const Shape& another) const {
-  const Ellipse* otherEllipse = dynamic_cast<const Ellipse*>(&another);
-
-  if (!otherEllipse) {
-    return false;
+  if (other.focus_1_ == focus_2_ && other.focus_2_ == focus_1_) {
+    return true;
   }
-  return isEqual(getDistance(focus1_, focus2_),
-                 getDistance(otherEllipse->focus1_, otherEllipse->focus2_)) &&
-         isEqual(sum_of_distances_, otherEllipse->sum_of_distances_);
+  return false;
 }
-
-bool Ellipse::isSimilarTo(const Shape& another) const {
-  const Ellipse* otherEllipse = dynamic_cast<const Ellipse*>(&another);
-
-  if (!otherEllipse) {
-    return false;
-  }
-
-  return isEqual(eccentricity(), otherEllipse->eccentricity());
-}
-
-bool Ellipse::containsPoint(const Point& point) const {
-  double eccentricity = this->eccentricity();
-  double semiMajorAx = sum_of_distances_ / 2.0;
-  double semiMinorAx = semiMajorAx * std::sqrt(1 - eccentricity * eccentricity);
-
-  double normalizedX = (point.x - center().x) / semiMajorAx;
-  double normalizedY = (point.y - center().y) / semiMinorAx;
-
-  return (normalizedX * normalizedX + normalizedY * normalizedY) <= 1.0;
+bool Ellipse::operator!=(const Shape& other) const { return !(*this == other); }
+bool Ellipse::operator!=(const Ellipse& other) const {
+  return !(*this == other);
 }
 
 void Ellipse::rotate(const Point& center, double angle) {
-  focus1_.rotate(center, angle);
-  focus2_.rotate(center, angle);
+  focus_1_.rotate(center, angle);
+  focus_2_.rotate(center, angle);
 }
 
 void Ellipse::reflex(const Point& center) {
-  focus1_.reflex(center);
-  focus2_.reflex(center);
+  focus_1_.reflex(center);
+  focus_2_.reflex(center);
 }
 
 void Ellipse::reflect(const Line& axis) {
-  focus1_.reflect(axis);
-  focus2_.reflect(axis);
+  focus_1_.reflect(axis);
+  focus_2_.reflect(axis);
 }
 
 void Ellipse::scale(const Point& center, double coefficient) {
-  focus1_.scale(center, coefficient);
-  focus2_.scale(center, coefficient);
+  focus_1_.scale(center, coefficient);
+  focus_2_.scale(center, coefficient);
+  length_ *= coefficient;
 }
 
 std::ostream& operator<<(std::ostream& out, const Ellipse& ellipse) {
-  out << "{(" << ellipse.focus1_ << " " << ellipse.focus2_ << "), "
-      << ellipse.sum_of_distances_ << "}" << std::endl;
+  out << "{(" << ellipse.focus_1_ << " " << ellipse.focus_2_ << "), "
+      << ellipse.length_ << "}";
   return out;
 }

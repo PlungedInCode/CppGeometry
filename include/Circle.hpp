@@ -1,23 +1,17 @@
-#pragma once
+#ifndef CIRCLE_HPP
+#define CIRCLE_HPP
 
-#include "Point.hpp"
 #include "Ellipse.hpp"
-#include "Constants.hpp"
+#include "Point.hpp"
 
 class Circle : public Ellipse {
-public:
-    Circle(const Point& center, const double radius);
-    ~Circle();
+ public:
+  Circle(const Point& center, const double radius);
+  ~Circle();
 
-    double radius() const;
+  double radius() const;
 
-    //* Shape class methods
-    double perimeter() const override;
-    double area() const override;
-    void scale(const Point& center, double coefficient) override;
-
-    friend std::ostream& operator<<(std::ostream& out, const Circle& circle);
-
-private:
-    double radius_;
+  friend std::ostream& operator<<(std::ostream& out, const Circle& circle);
 };
+
+#endif  // CIRCLE_HPP

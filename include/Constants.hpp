@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONSTANTS_HPP
+#define CONSTANTS_HPP
 
 #include <cmath>
 #include <numbers>
@@ -14,8 +15,9 @@ namespace Utils {
     return std::fabs(x - y) <= Constants::EPSILON;
   }
 
-  inline double degToRad(const double angle) { 
-    return (angle / Constants::PI_DEG) * Constants::PI; 
+  inline double degToRad(const double angle) {
+    return (angle / Constants::PI_DEG) * Constants::PI;
   }
 }  // namespace Utils
 
+#endif  // CONSTANTS_HPP
