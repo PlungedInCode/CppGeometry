@@ -1,9 +1,9 @@
 #include "Point.hpp"
+
 #include "Line.hpp"
+#include "Vector.hpp"
 
-#include <iostream>
-
-using namespace Uitls;
+using namespace Utils;
 
 Point::Point(const double x, const double y) : x(x), y(y) {}
 
@@ -57,25 +57,25 @@ Point operator/(Point lhs, const double scalar) {
   return lhs;
 }
 
-void Point::reflect(const Line& axis) {
-  double x0 = x, y0 = y;
-  double slope = axis.getSlope(), intercept = axis.getIntercept();
-
-  double x1 = slope * (slope * x0 + y0 - intercept) / (1 + slope * slope);
-  double y1 = slope * x1 + intercept;
-
-  x = 2 * x1 - x0;
-  y = 2 * y1 - y0;
+void Point::reflect(const Line& line) {
+  Point line1{0, line.getIntercept()};
+  Vector s{1, line.getSlope()};
+  double len = s.len();
+  Vector f{line1, *this};
+  double coef = 2 * f.vector_mult(s) /
+                (len * sqrt(1 + line.getSlope() * line.getSlope()));
+  this->x += (-line.getSlope()) * coef;
+  this->y += coef;
 }
 
 void Point::reflex(const Point& center) {
-  x = 2 * center.x - x;
-  y = 2 * center.y - y;
+  this->x = 2 * center.x - x;
+  this->y = 2 * center.y - y;
 }
 
 void Point::rotate(const Point& center, double angle) {
   Point translated = *this - center;
-  angle = degToRad(angle);
+  angle = Constants::PI * angle / 180;
   double rotatedX =
       translated.x * std::cos(angle) - translated.y * std::sin(angle);
   double rotatedY =
@@ -92,11 +92,6 @@ void Point::scale(const Point& center, const double coefficient) {
   this->y = center.y + scaled.y;
 }
 
-std::ostream& operator<<(std::ostream& out, const Point& point) {
-  out << "(" << point.x << ", " << point.y << ")";
-  return out;
-}
-
 double getDistance(const Point& p1, const Point& p2) {
   double xx = p2.x - p1.x;
   double yy = p2.y - p1.y;
@@ -104,8 +99,7 @@ double getDistance(const Point& p1, const Point& p2) {
   return distance;
 }
 
-bool Point::operator<(const Point& other) const {
-  double len1 = this->x * this->x + this->y * this->y;
-  double len2 = other.x * other.x + other.y * other.y;
-  return len1 < len2;
+std::ostream& operator<<(std::ostream& out, const Point& point) {
+  out << "(" << point.x << ", " << point.y << ")";
+  return out;
 }
