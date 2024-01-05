@@ -1,19 +1,16 @@
-#pragma once
+#ifndef SQUARE_HPP
+#define SQUARE_HPP
 
 #include "Circle.hpp"
 #include "Rectangle.hpp"
 
 class Square : public Rectangle {
  public:
-  Square(const Point& point1, const Point& point2);
-  ~Square();
+  Square(const Point&, const Point&);
+  Circle circumscribedCircle();
+  Circle inscribedCircle();
 
-  Circle circumscribedCircle() const;
-  Circle inscribedCircle() const;
-
-  //   bool operator==(const Shape& other) const override;
-
-  friend std::ostream& operator<<(std::ostream& out, const Rectangle& rect);
-
- private:
+  friend std::ostream& operator<<(std::ostream& out, const Square& sq);
 };
+
+#endif  // SQUARE_HPP
