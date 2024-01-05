@@ -1,8 +1,5 @@
 #include "Triangle.hpp"
 
-#include <iostream>
-#include <cmath>
-
 Triangle::Triangle(const Point& vertex1, const Point& vertex2,
                    const Point& vertex3)
     : Polygon::Polygon(vertex1, vertex2, vertex3) {}
@@ -10,41 +7,44 @@ Triangle::Triangle(const Point& vertex1, const Point& vertex2,
 Triangle::~Triangle(){};
 
 //* Additional methods specific to Triangle
-Circle Triangle::circumscribedCircle() const {
-  auto vertices = Polygon::getVertices();
-  Point A = vertices[0];
-  Point B = vertices[1];
-  Point C = vertices[2];
 
-  auto d = 2 * (A.x * (B.y - C.y) + B.x * (C.y - A.y) + C.x * (A.y - B.y));
-  double a = (A.x * A.x + A.y * A.y);
-  double b = (B.x * B.x + B.y * B.y);
-  double c = (C.x * C.x + C.y * C.y);
-
-  double center_x = (a * (B.y - C.y) +  b * (C.y - A.y) + c * (A.y - B.y)) / d;
-  double center_y = (a * (C.x - B.x) +  b * (A.x - C.x) + c * (B.x - A.x)) / d;
-
-  double radius = getDistance(A, {center_x, center_y});
-
-  return Circle({center_x, center_y}, radius);
+Point Triangle::centerCircumscribedCircle() const {
+  Vector v12{vertices_[1], vertices_[0]};
+  Vector v23{vertices_[2], vertices_[1]};
+  Vector v31{vertices_[0], vertices_[2]};
+  double z = v12.x * v31.y - v12.y * v31.x;
+  double z_1 =
+      vertices_[0].x * vertices_[0].x + vertices_[0].y * vertices_[0].y;
+  double z_2 =
+      vertices_[1].x * vertices_[1].x + vertices_[1].y * vertices_[1].y;
+  double z_3 =
+      vertices_[2].x * vertices_[2].x + vertices_[2].y * vertices_[2].y;
+  double z_x = z_3 * v12.y + z_1 * v23.y + z_2 * v31.y;
+  double z_y = z_3 * v12.x + z_1 * v23.x + z_2 * v31.x;
+  double new_x = -z_x / (2 * z);
+  double new_y = z_y / (2 * z);
+  return {new_x, new_y};
 }
-
+Circle Triangle::circumscribedCircle() const {
+  Point center = centerCircumscribedCircle();
+  return {center, Vector{center, vertices_[0]}.len()};
+}
 Circle Triangle::inscribedCircle() const {
-  auto vertices = Polygon::getVertices();
-  Point A = vertices[0];
-  Point B = vertices[1];
-  Point C = vertices[2];
-
-  double a = getDistance(B, C);
-  double b = getDistance(A, C);
-  double c = getDistance(A, B);
-
-  double centerX = (a * A.x + b * B.x + c * C.x) / (a + b + c);
-  double centerY = (a * A.y + b * B.y + c * C.y) / (a + b + c);
-
-  double radius = 2 * area() / perimeter();
-
-  return Circle({centerX, centerY}, radius);
+  double l_1 = Vector{vertices_[1], vertices_[2]}.len();
+  double l_2 = Vector{vertices_[0], vertices_[2]}.len();
+  double l_3 = Vector{vertices_[0], vertices_[1]}.len();
+  double new_y =
+      (l_1 * vertices_[0].y + l_2 * vertices_[1].y + l_3 * vertices_[2].y) /
+      (l_1 + l_2 + l_3);
+  double new_x =
+      (l_1 * vertices_[0].x + l_2 * vertices_[1].x + l_3 * vertices_[2].x) /
+      (l_1 + l_2 + l_3);
+  double rad = -(vertices_[1].x * vertices_[0].y + vertices_[0].x * new_y -
+                 vertices_[0].y * new_x - vertices_[1].x * new_y -
+                 vertices_[1].y * vertices_[0].x + vertices_[1].y * new_x) /
+               sqrt(pow(vertices_[0].x - vertices_[1].x, 2) +
+                    pow(vertices_[0].y - vertices_[1].y, 2));
+  return {Point{new_x, new_y}, rad};
 }
 
 Point Triangle::centroid() const {
@@ -56,13 +56,19 @@ Point Triangle::centroid() const {
 }
 
 Point Triangle::orthocenter() const {
-  Point circum_center = circumscribedCircle().center();
-  Point centroid_p = this->centroid();
-  double x = 3 * centroid_p.x - 2 * circum_center.x;
-  double y = 3 * centroid_p.y - 2 * circum_center.y;
-  return Point(x, y);
+  double a1 = vertices_[2].x - vertices_[1].x,
+         b1 = vertices_[2].y - vertices_[1].y;
+  double c1 = vertices_[0].x * (vertices_[2].x - vertices_[1].x) +
+              vertices_[0].y * (vertices_[2].y - vertices_[1].y);
+  double a2 = vertices_[2].x - vertices_[0].x,
+         b2 = vertices_[2].y - vertices_[0].y;
+  double c2 = vertices_[1].x * (vertices_[2].x - vertices_[0].x) +
+              vertices_[1].y * (vertices_[2].y - vertices_[0].y);
+  double den = a1 * b2 - a2 * b1;
+  double num_x = c1 * b2 - c2 * b1;
+  double num_y = a1 * c2 - a2 * c1;
+  return {num_x / den, num_y / den};
 }
-
 
 Line Triangle::EulerLine() const {
   Point orthocenter = Triangle::orthocenter();
@@ -72,10 +78,18 @@ Line Triangle::EulerLine() const {
 
 Circle Triangle::ninePointsCircle() const {
   Circle circumscribed = circumscribedCircle();
-  Circle inscribed = inscribedCircle();
+  Point center = (orthocenter() + circumscribed.center()) * 0.5;
+  return {center, circumscribed.radius() / 2};
+}
 
-  Point center = (circumscribed.center() + inscribed.center()) / 2.0;
-  double radius = (circumscribed.radius() + inscribed.radius()) / 2.0;
-
-  return Circle(center, radius);
+std::ostream& operator<<(std::ostream& out, const Triangle& trig) {
+  bool flag = false;
+  out << "{";
+  for (auto it : trig.getVertices()) {
+    if (flag) out << ", ";
+    out << it;
+    if (!flag) flag = true;
+  }
+  out << "}";
+  return out;
 }
