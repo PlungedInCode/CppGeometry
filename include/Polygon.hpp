@@ -1,30 +1,33 @@
-#pragma once
+#ifndef POLYGON_HPP
+#define POLYGON_HPP
 
-#include <algorithm>
 #include <vector>
-#include <set>
 
+#include "Vector.hpp"
 #include "Shape.hpp"
-#include "Constants.hpp"
 
 class Polygon : public Shape {
  public:
-  
-  Polygon(const std::vector<Point>& vertices);
+  Polygon();
+  explicit Polygon(const std::vector<Point>& vertices);
   template <typename... Args>
-  Polygon(const Args&... args) : vertices_({args...}) {} 
-  virtual ~Polygon();
+  Polygon(const Args&... args) : vertices_({args...}) {}
+
+  virtual ~Polygon() = default;
 
   size_t verticesCount() const;
   std::vector<Point> getVertices() const;
 
   bool isConvex() const;
 
+  bool operator==(const Polygon& other) const;
+  bool operator!=(const Polygon& other) const;
+
   //* Shape's virtual methods
-  double perimeter() const override;
-  double area() const override;
   bool operator==(const Shape& other) const override;
   bool operator!=(const Shape& other) const override;
+  double perimeter() const override;
+  double area() const override;
   bool isCongruentTo(const Shape& other) const override;
   bool isSimilarTo(const Shape& other) const override;
   bool containsPoint(const Point& point) const override;
@@ -36,6 +39,7 @@ class Polygon : public Shape {
 
   friend std::ostream& operator<<(std::ostream& out, const Polygon& polygon);
 
- private:
+ protected:
   std::vector<Point> vertices_;
 };
+#endif  // POLYGON_HPP

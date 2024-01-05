@@ -1,22 +1,20 @@
-#pragma once
+#ifndef RECTANGLE_HPP
+#define RECTANGLE_HPP
 
 #include "Point.hpp"
 #include "Polygon.hpp"
+// #include "Constants.hpp"
 
 class Rectangle : public Polygon {
-public:
-    Rectangle(const Point& point1, const Point& point2);
-    Rectangle(const Point& point1, const Point& point2, int ratio);
-    std::vector<Point> chooseVerticesOrder(const Point& point1, const Point& point2, int ratio) const;
-    virtual ~Rectangle();
+ public:
+  Rectangle(const Point& first, const Point& second, double coef);
+  Rectangle(const Point& first, const Point& second, int coef = 1);
+  Rectangle(const std::vector<Point>&);
 
-    Point center() const;
-    std::pair<Line, Line> diagonals() const;
+  Point center() const;
+  std::pair<Line, Line> diagonals() const;
 
-    // bool operator==(const Shape& other) const override;
-
-    friend std::ostream& operator<<(std::ostream& out, const Rectangle& rect);
-
-private:
-
+  friend std::ostream& operator<<(std::ostream& out, const Rectangle& rect);
 };
+
+#endif  // RECTANGLE_HPP

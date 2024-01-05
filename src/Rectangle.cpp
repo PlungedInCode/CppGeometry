@@ -1,31 +1,27 @@
 #include "Rectangle.hpp"
 
-Rectangle::Rectangle(const Point& point1, const Point& point2)
-    : Polygon::Polygon(point1, Point(point2.x, point1.y), point2,
-                       Point(point1.x, point2.y)) {}
-
-Rectangle::Rectangle(const Point& point1, const Point& point2, int ratio)
-    : Polygon(chooseVerticesOrder(point1, point2, ratio)) {}
-
-std::vector<Point> Rectangle::chooseVerticesOrder(const Point& point1,
-                                                  const Point& point2,
-                                                  int ratio) const {
-  double distance1to2 = getDistance(point1, point2);
-  double distanceRatio = distance1to2 / (1.0 + ratio);
-
-  Point p1 = point1;
-  Point p2 = point1 + Point(distanceRatio, 0);
-  Point p3 = point2;
-  Point p4 = point2 - Point(distanceRatio, 0);
-
-  if (point1.x < point2.x) {
-    return {p1, p2, p3, p4};
-  } else {
-    return {p2, p1, p4, p3};
+Rectangle::Rectangle(const Point& first, const Point& second, double coef)
+    : Polygon() {
+  vertices_.push_back(first);
+  Vector diag{first, second};
+  double cos = 1 / sqrt(coef * coef + 1);
+  double sin = sqrt(1 - cos * cos);
+  double new_x =
+      (second.x - first.x) * cos - (second.y - first.y) * sin + first.x;
+  double new_y =
+      (second.x - first.x) * sin + (second.y - first.y) * cos + first.y;
+  Vector v{first, Point(new_x, new_y)};
+  double sc = v.len() / diag.len();
+  if (coef < 1) {
+    sc *= coef;
   }
+  vertices_.emplace_back(first.x + v.x * sc, first.y + v.y * sc);
+  vertices_.push_back(second);
+  vertices_.emplace_back(second.x - v.x * sc, second.y - v.y * sc);
 }
-
-Rectangle::~Rectangle(){};
+Rectangle::Rectangle(const Point& first, const Point& second, int coef)
+    : Rectangle(first, second, static_cast<double>(coef)) {}
+Rectangle::Rectangle(const std::vector<Point>& points) : Polygon(points) {}
 
 Point Rectangle::center() const {
   auto vertices = Polygon::getVertices();
@@ -43,21 +39,13 @@ std::pair<Line, Line> Rectangle::diagonals() const {
   return std::make_pair(diag1, diag2);
 }
 
-// bool Rectangle::operator==(const Shape& other) const {
-//     const Rectangle* otherRectangle = dynamic_cast<const Rectangle*>(&other);
-
-//     if (otherRectangle) {
-//         return Polygon::operator==(*otherRectangle); // Compare sets of points
-//     }
-
-//     return false;
-// }
-
-
 std::ostream& operator<<(std::ostream& out, const Rectangle& rect) {
+  bool flag = false;
   out << "{";
   for (auto it : rect.getVertices()) {
-    out << it << ", ";
+    if (flag) out << ", ";
+    out << it;
+    if (!flag) flag = true;
   }
   out << "}";
   return out;

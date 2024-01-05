@@ -1,11 +1,7 @@
 #include "Polygon.hpp"
 
-using namespace Utils;
-
-//* Additional method specific to Polygon
+Polygon::Polygon() : vertices_() {}
 Polygon::Polygon(const std::vector<Point>& vertices) : vertices_(vertices) {}
-
-Polygon::~Polygon() {}
 
 size_t Polygon::verticesCount() const { return vertices_.size(); }
 
@@ -39,8 +35,6 @@ bool Polygon::isConvex() const {
   return true;
 }
 
-//* Virtual methods from Shape class
-
 double Polygon::perimeter() const {
   size_t count = vertices_.size();
   double perimeter = 0;
@@ -62,106 +56,204 @@ double Polygon::area() const {
                   vertices_[(i + 1) % n].x * vertices_[i].y);
   }
 
-  return 0.5 * std::fabs(totalArea);
+  return 0.5 * std::abs(totalArea);
 }
 
-bool verticesVectorsEqual(std::vector<Point> lhs, std::vector<Point> rhs) {
-  for (size_t j = 0; j < lhs.size() + 1; ++j) {
-    bool equal = true;
-    for (size_t i = 0; i < lhs.size(); ++i) {
-      if (lhs[i] != rhs[i]) {
-        equal = false;
-        break;
-      }
+bool Polygon::operator==(const Shape& other) const {
+  auto* poly = dynamic_cast<const Polygon*>(&other);
+  if (poly == nullptr || vertices_.size() != poly->vertices_.size()) {
+    return false;
+  }
+  return (*this == *poly);
+}
+bool Polygon::operator==(const Polygon& other) const {
+  if (vertices_.size() != other.vertices_.size()) {
+    return false;
+  }
+  bool found = false;
+  size_t start = 0;
+  for (size_t i = 0; i < vertices_.size(); ++i) {
+    if (vertices_[i] == other.vertices_[0]) {
+      start = i;
+      found = true;
+      break;
     }
-    std::rotate(lhs.begin(), lhs.begin() + 1, lhs.end());
-    if (equal) {
-      return true;
+  }
+  if (!found) {
+    return false;
+  }
+  for (size_t i = 0; i < vertices_.size(); ++i) {
+    size_t idx = (i + start >= vertices_.size()) ? i + start - vertices_.size()
+                                                 : i + start;
+    if (vertices_[idx] != other.vertices_[i]) {
+      found = false;
+      break;
+    }
+  }
+  if (found) {
+    return true;
+  }
+  for (size_t i = 1; i < vertices_.size(); ++i) {
+    size_t idx = (start < i) ? start + vertices_.size() - i : start - i;
+    if (vertices_[idx] != other.vertices_[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+bool Polygon::operator!=(const Shape& other) const { return !(*this == other); }
+bool Polygon::operator!=(const Polygon& other) const {
+  return !(*this == other);
+}
+
+bool Polygon::isCongruentTo(const Shape& other) const {
+  auto* poly = dynamic_cast<const Polygon*>(&other);
+  if (poly == nullptr || vertices_.size() != poly->vertices_.size()) {
+    return false;
+  }
+  std::vector<double> angles1(vertices_.size(), 0);
+  std::vector<double> lengths1(vertices_.size(), 0);
+  Vector first_vec{vertices_.back(), vertices_[0]};
+  Vector cur_vec{vertices_[0], vertices_[1]};
+  for (size_t i = 1; i < vertices_.size() - 1; ++i) {
+    angles1[i - 1] =
+        first_vec.vector_mult(cur_vec) / (first_vec.len() * cur_vec.len());
+    lengths1[i - 1] = cur_vec.len();
+    first_vec = cur_vec;
+    cur_vec(vertices_[i], vertices_[i + 1]);
+  }
+  angles1[vertices_.size() - 2] =
+      first_vec.vector_mult(cur_vec) / (first_vec.len() * cur_vec.len());
+  lengths1[vertices_.size() - 2] = cur_vec.len();
+  first_vec = cur_vec;
+  cur_vec(vertices_.back(), vertices_[0]);
+  angles1[vertices_.size() - 1] =
+      first_vec.vector_mult(cur_vec) / (first_vec.len() * cur_vec.len());
+  lengths1[vertices_.size() - 1] = cur_vec.len();
+
+  std::vector<double> angles2(vertices_.size(), 0);
+  std::vector<double> lengths2(vertices_.size(), 0);
+  first_vec(poly->vertices_.back(), poly->vertices_[0]);
+  cur_vec(poly->vertices_[0], poly->vertices_[1]);
+  for (size_t i = 1; i < vertices_.size() - 1; ++i) {
+    angles2[i - 1] =
+        first_vec.vector_mult(cur_vec) / (first_vec.len() * cur_vec.len());
+    lengths2[i - 1] = cur_vec.len();
+    first_vec = cur_vec;
+    cur_vec(poly->vertices_[i], poly->vertices_[i + 1]);
+  }
+  angles2[vertices_.size() - 2] =
+      first_vec.vector_mult(cur_vec) / (first_vec.len() * cur_vec.len());
+  lengths2[vertices_.size() - 2] = cur_vec.len();
+  first_vec = cur_vec;
+  cur_vec(poly->vertices_.back(), poly->vertices_[0]);
+  angles2[vertices_.size() - 1] =
+      first_vec.vector_mult(cur_vec) / (first_vec.len() * cur_vec.len());
+  lengths2[vertices_.size() - 1] = cur_vec.len();
+
+  for (size_t i = 0; i < vertices_.size(); ++i) {
+    if (fabs(angles1[i] - angles2[0]) < Constants::EPSILON) {
+      if (fabs(lengths1[i] - lengths2[0]) < Constants::EPSILON) {
+        bool flag = false;
+        for (size_t j = 1; j < vertices_.size(); ++j) {
+          size_t idx =
+              (i + j) >= vertices_.size() ? i + j - vertices_.size() : i + j;
+          if (fabs(angles1[idx] - angles2[j]) > Constants::EPSILON ||
+              fabs(lengths1[idx] - lengths2[j]) > Constants::EPSILON) {
+            flag = true;
+            break;
+          }
+        }
+        if (!flag) {
+          return true;
+        }
+      } else if (fabs(lengths1[i] - lengths2.back()) < Constants::EPSILON) {
+        bool flag = false;
+        for (size_t j = 1; j < vertices_.size(); ++j) {
+          size_t idx =
+              (i + j) >= vertices_.size() ? i + j - vertices_.size() : i + j;
+          if (fabs(angles1[idx] - angles2[vertices_.size() - j]) >
+                  Constants::EPSILON ||
+              fabs(lengths1[idx] - lengths2[vertices_.size() - 1 - j]) >
+                  Constants::EPSILON) {
+            flag = true;
+            break;
+          }
+        }
+        if (!flag) {
+          return true;
+        }
+      }
     }
   }
   return false;
 }
-
-bool Polygon::operator==(const Shape& other) const {
-  const auto otherPolygon = dynamic_cast<const Polygon*>(&other);
-
-  if (!otherPolygon || this->verticesCount() != otherPolygon->verticesCount()) {
-    return false;
-  }
-
-  std::vector<Point> thisCopy = this->getVertices();
-  bool equal = verticesVectorsEqual(thisCopy, otherPolygon->getVertices());
-  if (!equal) {
-    std::reverse(thisCopy.begin(), thisCopy.end());
-    equal = verticesVectorsEqual(thisCopy, otherPolygon->getVertices());
-  }
-  return equal;
-}
-
-bool Polygon::operator!=(const Shape& other) const { return !(*this == other); }
-
-bool Polygon::isCongruentTo(const Shape& other) const {
-  const auto otherPolygon = dynamic_cast<const Polygon*>(&other);
-
-  if (!otherPolygon || this->verticesCount() != otherPolygon->verticesCount()) {
-    return false;
-  }
-  std::vector<double> lhs_side_len, rhs_side_len;
-  size_t N = this->verticesCount();
-  for (size_t i = 0; i < N; ++i) {
-    lhs_side_len.push_back(getDistance(vertices_[i], vertices_[(i + 1) % N]));
-    rhs_side_len.push_back(getDistance(otherPolygon->vertices_[i],
-                                       otherPolygon->vertices_[(i + 1) % N]));
-  }
-
-  bool is_equal = true;
-  int match_index = -1, first_index = 0;
-  double first_len = rhs_side_len[0];
-  while (match_index < this->verticesCount()) {
-    for (size_t i = first_index; i < verticesCount(); ++i) {
-      if (isEqual(lhs_side_len[i], first_len)) {
-        match_index = i;
-        break;
-      }
-    }
-    if (match_index == -1) {
-      return false;
-    }
-
-    for (size_t i = 0; i < this->verticesCount(); ++i) {
-      if (!isEqual(rhs_side_len[i], lhs_side_len[(match_index + i) % N])) {
-        is_equal = false;
-        break;
-      }
-    }
-    if (is_equal) return true;
-
-    bool is_equal = true;
-    for (size_t i = 0; i < this->verticesCount(); ++i) {
-      int j = match_index - i;
-      if (match_index - i < 0) {
-        j += N;
-      }
-      if (!isEqual(rhs_side_len[i], lhs_side_len[j])) {
-        is_equal = false;
-        break;
-      }
-    }
-    if (is_equal) return true;
-    first_index = match_index + 1;
-    match_index = -1;
-  }
-  return is_equal;
-}
-
 bool Polygon::isSimilarTo(const Shape& other) const {
-  const auto otherPolygon = dynamic_cast<const Polygon*>(&other);
-
-  if (!otherPolygon) {
+  auto* poly = dynamic_cast<const Polygon*>(&other);
+  if (poly == nullptr || vertices_.size() != poly->vertices_.size()) {
     return false;
   }
-  double ratio = this->perimeter() / otherPolygon->perimeter();
-  return Utils::isEqual(ratio * ratio, this->area() / otherPolygon->area());
+  std::vector<double> angles1(vertices_.size(), 0);
+  Vector first_vec{vertices_.back(), vertices_[0]};
+  Vector cur_vec{vertices_[0], vertices_[1]};
+  for (size_t i = 1; i < vertices_.size() - 1; ++i) {
+    angles1[i - 1] =
+        first_vec.vector_mult(cur_vec) / (first_vec.len() * cur_vec.len());
+    first_vec = cur_vec;
+    cur_vec(vertices_[i], vertices_[i + 1]);
+  }
+  angles1[vertices_.size() - 2] =
+      first_vec.vector_mult(cur_vec) / (first_vec.len() * cur_vec.len());
+  first_vec = cur_vec;
+  cur_vec(vertices_.back(), vertices_[0]);
+  angles1[vertices_.size() - 1] =
+      first_vec.vector_mult(cur_vec) / (first_vec.len() * cur_vec.len());
+
+  std::vector<double> angles2(vertices_.size(), 0);
+  first_vec(poly->vertices_.back(), poly->vertices_[0]);
+  cur_vec(poly->vertices_[0], poly->vertices_[1]);
+  for (size_t i = 1; i < vertices_.size() - 1; ++i) {
+    angles2[i - 1] =
+        first_vec.vector_mult(cur_vec) / (first_vec.len() * cur_vec.len());
+    first_vec = cur_vec;
+    cur_vec(poly->vertices_[i], poly->vertices_[i + 1]);
+  }
+  angles2[vertices_.size() - 2] =
+      first_vec.vector_mult(cur_vec) / (first_vec.len() * cur_vec.len());
+  first_vec = cur_vec;
+  cur_vec(poly->vertices_.back(), poly->vertices_[0]);
+  angles2[vertices_.size() - 1] =
+      first_vec.vector_mult(cur_vec) / (first_vec.len() * cur_vec.len());
+
+  for (size_t i = 0; i < vertices_.size(); ++i) {
+    if (fabs(angles1[i] - angles2[0]) < Constants::EPSILON) {
+      bool flag = false;
+      for (size_t j = 0; j < vertices_.size(); ++j) {
+        size_t idx =
+            (j + i >= vertices_.size()) ? j + i - vertices_.size() : j + i;
+        if (fabs(angles1[idx] - angles2[j]) > Constants::EPSILON) {
+          flag = true;
+          break;
+        }
+      }
+      if (!flag) {
+        return true;
+      }
+    } else if (fabs(angles1[i] + angles2[0]) < Constants::EPSILON) {
+      bool flag = false;
+      for (size_t j = 1; j < vertices_.size(); ++j) {
+        size_t idx = (i < j) ? i + vertices_.size() - j : i - j;
+        if (fabs(angles1[idx] + angles2[j]) > Constants::EPSILON) {
+          flag = true;
+          break;
+        }
+      }
+      if (!flag) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 bool Polygon::containsPoint(const Point& point) const {
@@ -188,6 +280,7 @@ bool Polygon::containsPoint(const Point& point) const {
 
   return crossings % 2 == 1;
 }
+
 void Polygon::rotate(const Point& center, const double angle) {
   for (auto& vertex : vertices_) {
     vertex.rotate(center, angle);
@@ -199,6 +292,7 @@ void Polygon::reflex(const Point& center) {
     vertex.reflex(center);
   }
 }
+
 void Polygon::reflect(const Line& axis) {
   for (Point& vertex : vertices_) {
     vertex.reflect(axis);
