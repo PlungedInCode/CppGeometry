@@ -18,12 +18,12 @@ target_include_directories(cxx_setup INTERFACE ${PROJECT_SOURCE_DIR})
 
 
 # Update the submodules here
-include(external/UpdateSubmodules.cmake)
+include(lib/UpdateSubmodules.cmake)
 
 # Enable testing for this project
 include(CTest)
 
 # Add subdirectory with external projects' code
-add_subdirectory(external)
+add_subdirectory(lib)
 add_subdirectory(src)
 add_subdirectory(example)
