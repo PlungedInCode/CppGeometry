@@ -1,2 +1,2 @@
-add_executable(example example.cpp)
-target_link_libraries(example PRIVATE cxx_setup SimpleLogger Geometry)
+add_executable(GeometryExample example.cpp)
+target_link_libraries(GeometryExample PRIVATE SimpleLogger Geometry)
